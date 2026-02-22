@@ -4,6 +4,7 @@ import numpy as np
 import random
 
 def sigmoid(value):
+    value = np.clip(value, -500, 500)
     return 1 / (1 + np.exp(-value))
 
 def leakyrelu(value):

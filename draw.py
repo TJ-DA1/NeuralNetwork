@@ -1,7 +1,5 @@
-import matplotlib.pyplot as plt
-
 from NeuralNetwork import *
-import pygame
+import pygame, pygame_gui
 
 pygame.init()
 
@@ -11,8 +9,10 @@ for i in range(len(model.biases)):
     model.weights[i] = np.load(f"models/weights{i}.npy")
 
 screen = pygame.display.set_mode((504, 504))
-grid = np.zeros((28, 28), dtype="int")
+manager = pygame_gui.UIManager((504,504))
+guessindicator = pygame_gui.elements.UILabel(relative_rect=(0,480,290,20), text = "Null", manager=manager)
 
+grid = np.zeros((28, 28), dtype="int")
 imagedata = np.load("traindata/drawimagedata.npy")
 labeldata = np.load("traindata/drawlabeldata.npy")
 
@@ -25,15 +25,12 @@ while True:
 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
-                model.calculatelayers(np.reshape(blurred / 255, (784, 1)))
-                print(f"Model thinks this is a {np.argmax(model.activations[-1])}, {round(np.max(model.activations[-1] * 100), 1)}% certainty")
                 correct = input("Input actual value:\n")
-                if int(correct) != np.argmax(model.activations[-1]):
-                    imagedata = np.append(imagedata, np.reshape(blurred, (1, 28, 28, 1)), axis = 0)
-                    labeldata = np.append(labeldata, [int(correct)])
-                    np.save("traindata/drawimagedata.npy", imagedata)
-                    np.save("traindata/drawlabeldata.npy", labeldata)
-                    print("New data written")
+                imagedata = np.append(imagedata, np.reshape(blurred, (1, 28, 28, 1)), axis = 0)
+                labeldata = np.append(labeldata, [int(correct)])
+                np.save("traindata/drawimagedata.npy", imagedata)
+                np.save("traindata/drawlabeldata.npy", labeldata)
+                print("New data written")
 
     if keys[pygame.K_w]:
         x = abs(pygame.mouse.get_pos()[0] - 9) // 18
@@ -48,9 +45,16 @@ while True:
         grid = np.zeros((28, 28))
 
     blurred = gaussian_filter(grid, sigma=0.5)
+
     for i in range(28):
         for j in range(28):
             col = 255 - blurred[j][i]
             pygame.draw.rect(screen, (col, col, col), (i * 18, j * 18, 18, 18))
+
+    model.calculatelayers(np.reshape(blurred, (784, 1)))
+
+    guessindicator.set_text(f"Model thinks this is a {np.argmax(model.activations[-1])}, {round(np.max(model.activations[-1] * 100), 2)}% certainty")
+    manager.draw_ui(screen)
+    manager.update(1/60)
 
     pygame.display.flip()
