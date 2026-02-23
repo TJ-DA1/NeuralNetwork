@@ -1,9 +1,11 @@
+import matplotlib.pyplot as plt
+
 from NeuralNetwork import *
 import pygame, pygame_gui
 
 pygame.init()
 
-model = NeuralNetwork([784, 40, 20, 16, 10])
+model = NeuralNetwork([784, 128, 64, 10])
 for i in range(len(model.biases)):
     model.biases[i] = np.load(f"models/biases{i}.npy")
     model.weights[i] = np.load(f"models/weights{i}.npy")
@@ -26,7 +28,7 @@ while True:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
                 correct = input("Input actual value:\n")
-                imagedata = np.append(imagedata, np.reshape(blurred, (1, 28, 28, 1)), axis = 0)
+                imagedata = np.append(imagedata, np.reshape(blurred / 255, (1, 28, 28, 1)), axis = 0)
                 labeldata = np.append(labeldata, [int(correct)])
                 np.save("traindata/drawimagedata.npy", imagedata)
                 np.save("traindata/drawlabeldata.npy", labeldata)
@@ -44,14 +46,14 @@ while True:
     elif keys[pygame.K_c]:
         grid = np.zeros((28, 28))
 
-    blurred = gaussian_filter(grid, sigma=0.5)
+    blurred = gaussian_filter(grid, sigma=0.6)
 
     for i in range(28):
         for j in range(28):
             col = 255 - blurred[j][i]
             pygame.draw.rect(screen, (col, col, col), (i * 18, j * 18, 18, 18))
 
-    model.calculatelayers(np.reshape(blurred, (784, 1)))
+    model.calculatelayers(np.reshape(blurred, (784, 1)) / 255)
 
     guessindicator.set_text(f"Model thinks this is a {np.argmax(model.activations[-1])}, {round(np.max(model.activations[-1] * 100), 2)}% certainty")
     manager.draw_ui(screen)

@@ -3,15 +3,15 @@ from scipy.ndimage import gaussian_filter
 import numpy as np
 import random
 
-def sigmoid(value):
-    value = np.clip(value, -500, 500)
-    return 1 / (1 + np.exp(-value))
+def softmax(value):
+    exp = np.exp(value)
+    return exp / np.sum(exp, axis = 0, keepdims=True)
 
-def leakyrelu(value):
-    return np.max((value * 0.01, value), axis=0)
+def leakyrelu(value, param):
+    return np.where(value > 0, value, param * value)
 
-def derivativeleakyrelu(value):
-    return np.where(value > 0, 1, 0.01)
+def derivativeleakyrelu(value, param):
+    return np.where(value > 0, 1, param)
 
 def isworking(model, data, expected):
     model.calculatelayers(data)
