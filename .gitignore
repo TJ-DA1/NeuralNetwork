@@ -3,3 +3,4 @@ imageout/model.png
 __pycache__/NeuralNetwork.cpython-313.pyc
 *.pyc
 .idea
+imageout/fashion/model.png

@@ -1,25 +1,27 @@
 from NeuralNetwork import *
+from matplotlib import pyplot as plt
 
-model = NeuralNetwork([784, 2048, 2048, 10])
+model = NeuralNetwork([784, 256, 128, 10])
+modeltype = "digit"
 
 for i in range(len(model.biases)):
-    model.biases[i] = np.load(f"models/biases{i}.npy")
-    model.weights[i] = np.load(f"models/weights{i}.npy")
+    model.biases[i] = np.load(f"models/{modeltype}/biases{i}.npy")
+    model.weights[i] = np.load(f"models/{modeltype}/weights{i}.npy")
 
-testimagedata = np.load("testdata/testimagedata.npy")
-testlabeldata = np.load("testdata/testlabeldata.npy")
+testimagedata = np.load(f"testdata/{modeltype}/testimagedata.npy")
+testlabeldata = np.load(f"testdata/{modeltype}/testlabeldata.npy")
 
-testimagedata = testimagedata.reshape(-1, 784, 1)
+testimagedata = testimagedata.reshape(-1, 784)
 
-truthlist = []
-cost = 0
-for i in random.sample(range(0, 10000), 10000):
-    truthlist.append(isworking(model, testimagedata[i], testlabeldata[i]))
-    cost += model.calculateerror(testimagedata[i], testlabeldata[i])
+print(testimagedata.dtype)
 
-    # plt.matshow(testimagedata[i].reshape(28,28,1), cmap="binary")
-    # plt.title(f"Model: {np.argmax(model.activations[-1])} Actual: {testlabeldata[i]}")
-    # plt.show()
+cost, guessvalue = model.calculateerror(testimagedata.T, testlabeldata, 10000)
+truthlist = np.where(guessvalue == testlabeldata, 1, 0)
 
-print(f"Prediction rate: {truthlist.count(True)} / {len(truthlist)}")
-print(f"Average cost: {cost / 10000}")
+for i in range(100):
+    plt.matshow(testimagedata[i].reshape(28,28,1), cmap="binary")
+    plt.title(f"Model: {guessvalue[i]} Actual: {testlabeldata[i]}")
+    plt.show()
+
+print(f"Prediction rate: {np.unique(truthlist, return_counts=True)[1][1]} / {len(truthlist)}")
+print(f"Average cost: {cost}")

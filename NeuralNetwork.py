@@ -18,7 +18,7 @@ class NeuralNetwork:
             self.weights.append(np.random.randn(structure[i + 1], structure[i]) * np.sqrt(2 / structure[i]))
             self.biases.append(np.zeros((structure[i + 1], 1)))
 
-    def calculatelayers(self, data, dropoutprob = 0.2):
+    def calculatelayers(self, data, dropoutprob = 0):
         self.activations[0] = data
         for i in range(len(self.structure) - 2):
             value = self.weights[i] @ self.activations[i] + self.biases[i]
@@ -34,13 +34,12 @@ class NeuralNetwork:
                 dropouts = np.where(np.random.rand(*self.activations[i+1].shape) > dropoutprob, 1, 0)
                 self.activations[i+1] *= (dropouts / (1 - dropoutprob))
 
-
     def calculatecost(self, data, expected, batches = 1):
         testset = np.zeros((self.structure[-1], batches))
         testset[expected, np.arange(batches)] = 1
         self.calculatelayers(data)
-        cost = -np.sum(testset * np.log(self.activations[-1] + 1e-9))
 
+        cost = -np.sum(testset * np.log(self.activations[-1] + 1e-9))
         cost += (self.l2lambda / 2) * sum(np.sum(np.square(self.weights[i])) for i in range(len(self.weights)))
 
         return cost / batches
@@ -49,11 +48,13 @@ class NeuralNetwork:
         testset = np.zeros((self.structure[-1], batches))
         testset[expected, np.arange(batches)] = 1
         self.calculatelayers(data)
+
         error = np.sum(np.square(self.activations[-1] - testset)) / 2
+        guessvalue = np.argmax(self.activations[-1], axis=0)
 
-        return error / batches
+        return error / batches, guessvalue
 
-    def backpropogate(self, data, expected, batches, dropoutprob = 0):
+    def backpropogate(self, data, expected, batches, dropoutprob):
         testset = np.zeros((self.structure[-1], batches))
         testset[expected, np.arange(batches)] = 1
         self.calculatelayers(data, dropoutprob)

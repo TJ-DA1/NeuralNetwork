@@ -1,11 +1,12 @@
 from NeuralNetwork import *
 import pygame
 
-model = NeuralNetwork([784, 128, 64, 10])
-for i in range(len(model.biases)):
-    model.biases[i] = np.load(f"models/biases{i}.npy")
-    model.weights[i] = np.load(f"models/weights{i}.npy")
+model = NeuralNetwork([784, 256, 128, 10])
+modeltype = "fashion"
 
+for i in range(len(model.biases)):
+    model.biases[i] = np.load(f"models/{modeltype}/biases{i}.npy")
+    model.weights[i] = np.load(f"models/{modeltype}/weights{i}.npy")
 
 layerspacing = 6000
 height = 20 * len(model.activations[0])
@@ -25,8 +26,8 @@ for i in range(len(model.weights)):
             startpos = (x1 + 100, ((height * (k + 1)) / (len(model.activations[i]) + 1)) + 100)
 
             weight = model.weights[i][j][k]
-            normalisedcolour = 205 * ((abs(weight) / colourarg) ** 0.5)
-            normalisedcolour += 50
+            normalisedcolour = 155 * ((abs(weight) / colourarg) ** 0.5)
+            normalisedcolour += 100
             colour = (0, normalisedcolour, 0) if weight > 0 else (normalisedcolour, 0, 0)
 
             pygame.draw.line(screen, colour, startpos, endpos, 1 if not i else 3)
@@ -51,4 +52,4 @@ for i in range(len(model.activations)):
 
         pygame.draw.circle(screen, colour, (x + 100, y + 100), radius)
 
-pygame.image.save(screen, "imageout/model.png")
+pygame.image.save(screen, f"imageout/{modeltype}/model.png")

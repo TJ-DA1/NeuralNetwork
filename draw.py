@@ -1,22 +1,22 @@
-import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter
 
 from NeuralNetwork import *
 import pygame, pygame_gui
 
 pygame.init()
 
-model = NeuralNetwork([784, 128, 64, 10])
+model = NeuralNetwork([784, 256, 128, 10])
+modeltype = "digit"
+
 for i in range(len(model.biases)):
-    model.biases[i] = np.load(f"models/biases{i}.npy")
-    model.weights[i] = np.load(f"models/weights{i}.npy")
+    model.biases[i] = np.load(f"models/{modeltype}/biases{i}.npy")
+    model.weights[i] = np.load(f"models/{modeltype}/weights{i}.npy")
 
 screen = pygame.display.set_mode((504, 504))
 manager = pygame_gui.UIManager((504,504))
 guessindicator = pygame_gui.elements.UILabel(relative_rect=(0,480,290,20), text = "Null", manager=manager)
 
 grid = np.zeros((28, 28), dtype="int")
-imagedata = np.load("traindata/drawimagedata.npy")
-labeldata = np.load("traindata/drawlabeldata.npy")
 
 while True:
     screen.fill((255, 255, 255))
@@ -24,15 +24,6 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
             raise SystemExit
-
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RETURN:
-                correct = input("Input actual value:\n")
-                imagedata = np.append(imagedata, np.reshape(blurred / 255, (1, 28, 28, 1)), axis = 0)
-                labeldata = np.append(labeldata, [int(correct)])
-                np.save("traindata/drawimagedata.npy", imagedata)
-                np.save("traindata/drawlabeldata.npy", labeldata)
-                print("New data written")
 
     if keys[pygame.K_w]:
         x = abs(pygame.mouse.get_pos()[0] - 9) // 18
